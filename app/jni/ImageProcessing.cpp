@@ -35,7 +35,6 @@ using namespace cv;
  * Signature: (Landroid/graphics/Bitmap;[B)V
  */
 
-// TODO: the fuck is background subtraction???
 JNIEXPORT void JNICALL Java_io_github_melvincabatuan_backgroundsubtraction_MainActivity_predict
   (JNIEnv * pEnv, jobject pClass, jobject pTarget, jbyteArray pSource){
 
@@ -88,21 +87,27 @@ JNIEXPORT void JNICALL Java_io_github_melvincabatuan_backgroundsubtraction_MainA
      bg_model->apply(srcGray, fgmask, -1);
 
     /// Smoothin
-    GaussianBlur(fgmask, fgmask, Size(11, 11), 3.5, 3.5);
-    threshold(fgmask, fgmask, 10, 255, THRESH_BINARY);
+    //GaussianBlur(fgmask, fgmask, Size(11, 11), 3.5, 3.5);
+    //threshold(fgmask, fgmask, 10, 255, THRESH_BINARY);
 
     //Patrick line detection
-    vector< vector<Point> > contours;
+    /*vector< vector<Point> > contours;
     findContours(fgmask,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE,Point(0,0));
 
     for(int i=0;i<contours.size();i++)
     {
         Scalar color = Scalar( 255,255,255);
         drawContours( fgimg, contours, i, color, 1 );
+    }*/
+    Canny(src, fgimg, 50, 200, 3);
+    vector<Vec4i> lines;
+    HoughLinesP(fgimg, lines, 0.5, CV_PI/180, 50, 50, 10 );
+    for( size_t i = 0; i < lines.size(); i++ ) {
+        Vec4i l = lines[i];
+        line( mbgra, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255),3, CV_AA);
     }
-
-     /// Display foreground image in Android            
-      cvtColor(fgimg, mbgra, CV_GRAY2BGRA);
+     /// Display foreground image in Android
+     cvtColor(fgimg, mbgra, CV_GRAY2BGRA);
 
     if(DEBUG){
       LOGI("Successfully finished native image processing...");

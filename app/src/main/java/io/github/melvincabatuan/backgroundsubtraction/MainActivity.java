@@ -28,6 +28,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     private TextureView tv;
     private byte[] videoSource;
     private ImageView imViewA;
+    private ImageView imViewB;
     private Bitmap imageA;
     final boolean LOG_FRAME_RATE = true;
     private boolean bProcessing = false;
@@ -39,8 +40,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         setContentView(R.layout.activity_main);
 
         tv = (TextureView) findViewById(R.id.preview);
-        //tv = new TextureView(this); //Patrick added
         imViewA = (ImageView) findViewById(R.id.imageViewA);
+        imViewB = (ImageView) findViewById(R.id.imageViewB);
 
         tv.setSurfaceTextureListener(this);
     }
@@ -102,11 +103,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             bProcessing = true;
             predict(imageA, videoSource);
             imViewA.invalidate();
+            imViewB.invalidate();
             mCamera.addCallbackBuffer(videoSource);
             bProcessing = false;
-            Canvas canvas = tv.lockCanvas(); //Patrick added
-            canvas.drawBitmap(imageA, 0, 0, null); //Patrick added TODO: work out drawing augmented bitmap onto preview canvas
-            tv.unlockCanvasAndPost(canvas); //Patrick added
+            //Canvas canvas = tv.lockCanvas(); //Patrick added
+            //canvas.drawBitmap(imageA, 0, 0, null); //Patrick added TODO: work out drawing augmented bitmap onto preview canvas
+            //tv.unlockCanvasAndPost(canvas); //Patrick added
         }
     };
 
@@ -150,10 +152,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             videoSource = new byte[sourceSize];
             imageA = Bitmap.createBitmap(size.width, size.height, Bitmap.Config.ARGB_8888);
             imViewA.setImageBitmap(imageA);
+            imViewB.setImageBitmap(imageA);
 
             /// Queue video frame buffer and start camera preview
             mCamera.addCallbackBuffer(videoSource);
             mCamera.startPreview();
+            tv.setAlpha(0);
 
         } catch (IOException e){
             mCamera.release();
